@@ -6,9 +6,20 @@ from points import Point
 import time
 import os
 import matplotlib.pyplot as plt
+import math
 
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
+
+def DistanciaDe(a,b):
+    return math.sqrt((b.x-a.x)**2 + (b.y-a.y)**2)
+
+def SomaDistancias(pontos):
+    s=0
+    for i in range(len(pontos)):
+        dist = DistanciaDe(pontos[i], pontos[(i+1) % len(pontos)])
+        
+        
 largura, altura = 1000,1000
 #cores
 preto = (0,0,0)
@@ -20,12 +31,12 @@ pygame.init()
 pygame.display.set_caption("Problema do Caixeiro Viajante")
 screen = pygame.display.set_mode((largura, altura))
 
-#variables 
+#variaveis 
 pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 100
+nr_de_pontos = 30
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -47,6 +58,7 @@ def calcula_distancia(pontos):
     for n in range(len(pontos)-1):
         distancia = ((pontos[n].x - pontos[n+1].x)**2 + (pontos[n].y - pontos[n+1].y)**2)**0.5
         total += distancia 
+    
     return total
 
 dist = calcula_distancia(pontos)
