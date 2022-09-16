@@ -36,7 +36,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 30
+nr_de_pontos = 15
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -58,10 +58,21 @@ def calcula_distancia(pontos):
     for n in range(len(pontos)-1):
         distancia = ((pontos[n].x - pontos[n+1].x)**2 + (pontos[n].y - pontos[n+1].y)**2)**0.5
         total += distancia 
+        
+    return total
+
+#calcula a distancia considerando que o caminho deve iniciar e encerrar no mesmo ponto        
+def calcula_distancia_euleriana(pontos):
+    total = 0
+    pontos.append(pontos[0])
+    for n in range(len(pontos)-1):
+        distancia = ((pontos[n].x - pontos[n+1].x)**2 + (pontos[n].y - pontos[n+1].y)**2)**0.5
+        total += distancia 
     
     return total
 
 dist = calcula_distancia(pontos)
+dist_e = calcula_distancia_euleriana(pontos)
 record_distance = dist
 menor_caminho = pontos.copy()
 
@@ -90,6 +101,7 @@ while run:
     a = random.randint(0, len(pontos)-1)
     b = random.randint(0, len(pontos)-1)
     shuffle(pontos, a, b)
+    pontos.append(pontos[0]) # condição para que o caminho se torne um ciclo
     dist = calcula_distancia(pontos)
     if dist < record_distance:
         record_distance = dist
@@ -105,6 +117,7 @@ while run:
     
     pygame.display.update()
     cont += 1
+    print("distancia: ", dist)
     
     
 print("A menor distancia é: ", record_distance)
