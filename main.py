@@ -18,8 +18,37 @@ def SomaDistancias(pontos):
     s=0
     for i in range(len(pontos)):
         dist = DistanciaDe(pontos[i], pontos[(i+1) % len(pontos)])
+ 
+def constroiCaminho(pontos):
+    caminho = pontos.copy()
+    caminho.append(pontos[0])
+    return caminho
+    
+           
+#calcula distancia usando teorema de pitagoras, construindo caminho euleriano
+def calcula_distancia(caminho):
+    total = 0
+    for n in range(len(caminho)-1):
+        distancia = ((caminho[n].x - caminho[n+1].x)**2 + (caminho[n].y - caminho[n+1].y)**2)**0.5
+        total += distancia 
         
+    return total
+
+
+
+#embaralha a posição dos pontos da lista
+def shuffle(pontos):
+    a=0
+    b=0
+    while a == b:
+        a = random.randint(0, len(pontos)-1)
+        b = random.randint(0, len(pontos)-1)
         
+    temp = pontos[a]
+    pontos[a] = pontos[b]
+    pontos[b] = temp
+    
+       
 largura, altura = 1000,1000
 #cores
 preto = (0,0,0)
@@ -36,7 +65,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 15
+nr_de_pontos = 10
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -46,33 +75,9 @@ for n in range(nr_de_pontos):
     point = Point(x,y)
     pontos.append(point)
     
-#embaralha a posição dos pontos da lista
-def shuffle(a, b, c):
-    temp = a[b]
-    a[b] = a[c]
-    a[c] = temp
     
-#distance between point using pythagorean theorem
-def calcula_distancia(pontos):
-    total = 0
-    for n in range(len(pontos)-1):
-        distancia = ((pontos[n].x - pontos[n+1].x)**2 + (pontos[n].y - pontos[n+1].y)**2)**0.5
-        total += distancia 
-        
-    return total
-
-#calcula a distancia considerando que o caminho deve iniciar e encerrar no mesmo ponto        
-def calcula_distancia_euleriana(pontos):
-    total = 0
-    pontos.append(pontos[0])
-    for n in range(len(pontos)-1):
-        distancia = ((pontos[n].x - pontos[n+1].x)**2 + (pontos[n].y - pontos[n+1].y)**2)**0.5
-        total += distancia 
-    
-    return total
-
-dist = calcula_distancia(pontos)
-dist_e = calcula_distancia_euleriana(pontos)
+caminho = constroiCaminho(pontos)
+dist = calcula_distancia(caminho)
 record_distance = dist
 menor_caminho = pontos.copy()
 
@@ -98,26 +103,27 @@ while run:
     for n in range(len(pontos)):
         pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
     
-    a = random.randint(0, len(pontos)-1)
-    b = random.randint(0, len(pontos)-1)
-    shuffle(pontos, a, b)
-    pontos.append(pontos[0]) # condição para que o caminho se torne um ciclo
-    dist = calcula_distancia(pontos)
+    #FORÇA BRUTA
+    shuffle(pontos)
+    
+    caminho = constroiCaminho(pontos)
+    dist = calcula_distancia(caminho)
+    
     if dist < record_distance:
         record_distance = dist
-        menor_caminho = pontos.copy()
+        menor_caminho = caminho.copy()
         
         print("iteração: ", cont,"|| distancia do menor caminho", record_distance)
         
-    for m in range(len(pontos)-1):
-        pygame.draw.line(screen, branco, (pontos[m].x, pontos[m].y), (pontos[m+1].x, pontos[m+1].y), 2)
+    for m in range(len(caminho)-1):
+        pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 5)
     
     for m in range(len(menor_caminho)-1):
-        pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 2)
+        pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 3)
     
     pygame.display.update()
     cont += 1
-    print("distancia: ", dist)
+    #print("distancia: ", dist)
     
     
 print("A menor distancia é: ", record_distance)
