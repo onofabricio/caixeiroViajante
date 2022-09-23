@@ -65,7 +65,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 10
+nr_de_pontos = 20
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -114,12 +114,13 @@ while run:
         menor_caminho = caminho.copy()
         
         print("iteração: ", cont,"|| distancia do menor caminho", record_distance)
+      
+    for m in range(len(menor_caminho)-1):
+        pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 5)  
         
     for m in range(len(caminho)-1):
-        pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 5)
+        pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
     
-    for m in range(len(menor_caminho)-1):
-        pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 3)
     
     pygame.display.update()
     cont += 1
