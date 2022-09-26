@@ -7,6 +7,7 @@ import time
 import os
 import matplotlib.pyplot as plt
 import math
+import itertools
 
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
@@ -48,6 +49,51 @@ def shuffle(pontos):
     pontos[a] = pontos[b]
     pontos[b] = temp
     
+def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run):
+    
+    
+    cont=0
+    caminhos_possiveis = itertools.permutations(pontos)
+    while run:
+        for pontos in caminhos_possiveis:
+            pontos = list(pontos)
+            screen.fill(preto)
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    
+            #desenha pontos
+            
+            for n in range(len(pontos)):
+                pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
+            
+            
+            
+            caminho = constroiCaminho(pontos)
+            dist = calcula_distancia(caminho)
+            
+            if dist < record_distance:
+                record_distance = dist
+                menor_caminho = caminho.copy()
+                
+                print("iteração: ", cont,"|| distancia do menor caminho", record_distance)
+            
+            for m in range(len(menor_caminho)-1):
+                pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 5)  
+                
+            for m in range(len(caminho)-1):
+                pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
+            
+            
+            pygame.display.update()
+            cont += 1
+        print("Qtde de iterações", cont)
+        time.sleep(3)
+        pygame.display.update()
+        run = False
+    
+    return pontos
        
 largura, altura = 1000,1000
 #cores
@@ -65,7 +111,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 20
+nr_de_pontos = 6
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -90,41 +136,8 @@ pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-cont=1
-while run:
-    cont += 1
-    screen.fill(preto)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-            
-    #desenha linhas e pontos
+forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
     
-    for n in range(len(pontos)):
-        pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
-    
-    #FORÇA BRUTA
-    shuffle(pontos)
-    
-    caminho = constroiCaminho(pontos)
-    dist = calcula_distancia(caminho)
-    
-    if dist < record_distance:
-        record_distance = dist
-        menor_caminho = caminho.copy()
-        
-        print("iteração: ", cont,"|| distancia do menor caminho", record_distance)
-      
-    for m in range(len(menor_caminho)-1):
-        pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 5)  
-        
-    for m in range(len(caminho)-1):
-        pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
-    
-    
-    pygame.display.update()
-    cont += 1
-    #print("distancia: ", dist)
     
     
 print("A menor distancia é: ", record_distance)
