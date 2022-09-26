@@ -54,6 +54,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
     
     cont=0
     caminhos_possiveis = itertools.permutations(pontos)
+    font = pygame.font.Font('freesansbold.ttf', 32) #fonte a ser usada nas variaveis
     while run:
         for pontos in caminhos_possiveis:
             pontos = list(pontos)
@@ -62,7 +63,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-                    
+            
             #desenha pontos
             
             for n in range(len(pontos)):
@@ -85,6 +86,11 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             for m in range(len(caminho)-1):
                 pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
             
+            #Variaveis na tela
+            texto_iteracao = font.render(str(cont), True, branco) # cria um objeto de superficie para a fonte
+            textRect_iteracao = texto_iteracao.get_rect() # cria uma superficie retangular para texto 
+            textRect_iteracao.center = (900, 15) # define a posição do centro do retangulo acima
+            screen.blit(texto_iteracao, textRect_iteracao)
             
             pygame.display.update()
             cont += 1
@@ -93,7 +99,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
         pygame.display.update()
         run = False
     
-    return pontos
+    return record_distance
        
 largura, altura = 1000,1000
 #cores
@@ -111,7 +117,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 6
+nr_de_pontos = 9
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -136,7 +142,7 @@ pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
     
     
     
