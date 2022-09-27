@@ -2,13 +2,13 @@ from turtle import update, width
 import pygame
 import random
 import numpy as np
+import pandas as pd
 from points import Point
 import time
 import os
-import matplotlib.pyplot as plt
 import math
 import itertools
-
+import sys
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
 
@@ -54,7 +54,10 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
     
     cont=0
     caminhos_possiveis = itertools.permutations(pontos)
-    font = pygame.font.Font('freesansbold.ttf', 32) #fonte a ser usada nas variaveis
+    font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
+    record_distance = np.inf
+    record_cont = 0
+
     while run:
         for pontos in caminhos_possiveis:
             pontos = list(pontos)
@@ -77,8 +80,11 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             if dist < record_distance:
                 record_distance = dist
                 menor_caminho = caminho.copy()
+                record_cont = cont
                 
-                print("iteração: ", cont,"|| distancia do menor caminho", record_distance)
+                print("iteração: ", record_cont,"|| distancia do menor caminho", record_distance)
+                
+                
             
             for m in range(len(menor_caminho)-1):
                 pygame.draw.line(screen, verde, (menor_caminho[m].x, menor_caminho[m].y), (menor_caminho[m+1].x, menor_caminho[m+1].y), 5)  
@@ -87,19 +93,115 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
                 pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
             
             #Variaveis na tela
-            texto_iteracao = font.render(str(cont), True, branco) # cria um objeto de superficie para a fonte
+            texto_iteracao = font.render(str(cont+1)+'/'+str(np.math.factorial(len(pontos))), True, branco) # cria um objeto de superficie para a fonte
             textRect_iteracao = texto_iteracao.get_rect() # cria uma superficie retangular para texto 
-            textRect_iteracao.center = (900, 15) # define a posição do centro do retangulo acima
+            textRect_iteracao.center = (900, 20) # define a posição do centro do retangulo acima
             screen.blit(texto_iteracao, textRect_iteracao)
+            
+            
+            texto_menorcaminho = font.render('iteração: '+str(record_cont+1)+' || distancia do menor caminho: '+str(record_distance), True, branco)
+            textRect_menorcaminho = texto_menorcaminho.get_rect()
+            textRect_menorcaminho.center = (500, 970)
+            screen.blit(texto_menorcaminho, textRect_menorcaminho)
             
             pygame.display.update()
             cont += 1
         print("Qtde de iterações", cont)
         time.sleep(3)
-        pygame.display.update()
         run = False
-    
+        pygame.display.quit()
+        pygame.quit()
+        sys.exit()
     return record_distance
+
+
+
+
+def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run):
+    
+    def geraCaminhoAleatorio(pontos):
+        caminho = np.random.permutation(pontos)
+        caminho = list(caminho)
+        caminho.append(caminho[0])
+        return caminho        
+    
+    def calculaFitness(df):
+        soma=0
+        for i in range(len(df)):
+            distancia = df['distancias'][i]
+            soma = soma + (1/distancia)
+        vec_fitness = []
+        for i in range(len(df)):
+            vec_fitness.append((1/df['distancias'][i])/soma)
+        df['fitness'] = vec_fitness
+            
+        return df 
+    
+    def novaGeracao(df):
+        
+        #calculo da pizza
+        #selecao de pais
+        #crossover entre pais
+        #add 3 filhos na população
+        #eliminar 3 piores
+         
+        return df
+    
+    cont=0
+    caminhos_possiveis = itertools.permutations(pontos)
+    font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
+    record_distance = np.inf
+    record_cont = 0
+    nr_de_cromossomos = 6
+    populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
+    distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
+    ids = [i for i in range(1,len(populacao_inicial)+1)]
+    df = pd.DataFrame(list(zip(ids, populacao_inicial, distancias)), columns = ['id','caminho', 'distancias'])
+    df = calculaFitness(df)
+    print(df)
+    
+    
+
+    while run:
+        for i in range(len(df)):
+            screen.fill(preto)
+            caminho = df['caminho'][i]
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            
+            #desenha pontos
+            
+            for n in range(len(pontos)):
+                pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
+                
+            for m in range(len(caminho)-1):
+                pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
+            
+            #Variaveis na tela
+            texto_id = font.render('id cromossomo: '+str(df['id'][i]), True, branco) # cria um objeto de superficie para a fonte
+            textRect_id = texto_id.get_rect() # cria uma superficie retangular para texto 
+            textRect_id.center = (100, 20) # define a posição do centro do retangulo acima
+            screen.blit(texto_id, textRect_id)
+            
+            texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
+            textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
+            textRect_dist.center = (200, 975) # define a posição do centro do retangulo acima
+            screen.blit(texto_dist, textRect_dist)
+            
+                
+            
+            pygame.display.update()
+            time.sleep(2)
+            
+    return record_distance
+       
+       
+       
+       
+       
+       
+       
        
 largura, altura = 1000,1000
 #cores
@@ -117,7 +219,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 9
+nr_de_pontos = 10
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
@@ -142,9 +244,9 @@ pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+#record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
     
-    
+ 
     
 print("A menor distancia é: ", record_distance)
-pygame.quit()
