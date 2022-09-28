@@ -95,19 +95,19 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             #Variaveis na tela
             texto_iteracao = font.render(str(cont+1)+'/'+str(np.math.factorial(len(pontos))), True, branco) # cria um objeto de superficie para a fonte
             textRect_iteracao = texto_iteracao.get_rect() # cria uma superficie retangular para texto 
-            textRect_iteracao.center = (900, 20) # define a posição do centro do retangulo acima
+            textRect_iteracao.center = (100, 20) # define a posição do centro do retangulo acima
             screen.blit(texto_iteracao, textRect_iteracao)
             
             
             texto_menorcaminho = font.render('iteração: '+str(record_cont+1)+' || distancia do menor caminho: '+str(record_distance), True, branco)
             textRect_menorcaminho = texto_menorcaminho.get_rect()
-            textRect_menorcaminho.center = (500, 970)
+            textRect_menorcaminho.center = (400, 670)
             screen.blit(texto_menorcaminho, textRect_menorcaminho)
             
             pygame.display.update()
             cont += 1
         print("Qtde de iterações", cont)
-        time.sleep(3)
+        time.sleep(1000)
         run = False
         pygame.display.quit()
         pygame.quit()
@@ -142,6 +142,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         #calculo da pizza
         #selecao de pais
         #crossover entre pais
+        #https://www.youtube.com/watch?v=lcS-fv8tiEA
         #add 3 filhos na população
         #eliminar 3 piores
          
@@ -186,7 +187,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             
             texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (200, 975) # define a posição do centro do retangulo acima
+            textRect_dist.center = (200, 670) # define a posição do centro do retangulo acima
             screen.blit(texto_dist, textRect_dist)
             
                 
@@ -203,7 +204,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
        
        
        
-largura, altura = 1000,1000
+largura, altura = 700, 700
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -244,8 +245,8 @@ pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-#record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
-algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+#algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
     
  
     
