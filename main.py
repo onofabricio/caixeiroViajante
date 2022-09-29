@@ -101,7 +101,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             
             texto_menorcaminho = font.render('iteração: '+str(record_cont+1)+' || distancia do menor caminho: '+str(record_distance), True, branco)
             textRect_menorcaminho = texto_menorcaminho.get_rect()
-            textRect_menorcaminho.center = (400, 670)
+            textRect_menorcaminho.center = (400, 940)
             screen.blit(texto_menorcaminho, textRect_menorcaminho)
             
             pygame.display.update()
@@ -119,11 +119,13 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
 
 def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run):
     
+    geracao = 1
     def geraCaminhoAleatorio(pontos):
         caminho = np.random.permutation(pontos)
         caminho = list(caminho)
         caminho.append(caminho[0])
         return caminho        
+    
     
     def calculaFitness(df):
         soma=0
@@ -137,14 +139,120 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             
         return df 
     
+    
+    def calculoDaPizza(df):
+        pizza=[]
+        soma = 0
+        for i in range(len(df)):
+            soma += df['fitness'][i]
+            pizza.append(soma)
+        
+        df['pedaco'] = pizza
+        return df
+    
+    
+    def selecaoDePais(df):
+        pai=0
+        mae=0
+        
+        
+        while pai == mae:
+            sorteio_pai = random.random()
+            sorteio_mae = random.random()
+        
+            for i in range(len(df)):
+                if sorteio_pai < df['pedaco'][i]:
+                    pai = df['id'][i]
+                    break
+                
+            for i in range(len(df)):
+                if sorteio_mae < df['pedaco'][i]:
+                    mae = df['id'][i]
+                    break
+        print("sorteio_pai: ",sorteio_pai," pai: ",pai)
+        print("sorteio_mae: ",sorteio_mae," mae: ",mae)
+        return pai, mae
+    
+    
+    def crossover(df, pai, mae):
+        
+        ponto_de_crossover = random.randint(1, len(df['caminho'][0])-1)
+        print("ponto de crossover", ponto_de_crossover)
+        
+        for i in range(len(df)):
+            if df['id'][i] == pai:
+                caminho_pai = df['caminho'][i]
+            elif df['id'][i] == mae:
+                caminho_mae = df['caminho'][i]
+        
+        
+        caminho_pai = caminho_pai[:-1]
+        caminho_mae = caminho_mae[:-1]
+        filho = caminho_pai.copy()
+        filha = caminho_mae.copy()
+        
+        for i in range(ponto_de_crossover, len(caminho_pai)):
+            filho[i], filha[i] = caminho_mae[i], caminho_pai[i]
+        
+        filho.append(filho[0])
+        filha.append(filha[0])
+        
+        
+        return filho, filha
+         
+        
+    def addFilhosNaPopulacao(df, filho, filha):
+        
+        novos_caminhos = [filho, filha]
+        novos_ids = [max(df['id'])+1, max(df['id'])+2]
+        novas_distancias = [calcula_distancia(filho), calcula_distancia(filha)]
+        novos_fitness = [0,0]
+        novos_pedacos = [0,0]
+        
+        novo_df = pd.DataFrame(list(zip(novos_ids, novos_caminhos, novas_distancias, novos_fitness, novos_pedacos)), columns = ['id','caminho', 'distancias','fitness','pedaco'])
+        
+        df = pd.concat([df,novo_df], axis=0, ignore_index=True)
+        
+        return df
+    
+    
+    def elimina2piores(df):
+        
+        print("original\n",df)
+        maior_distancia = 0
+        for i in range(len(df)):
+            if df['distancias'][i] > maior_distancia:
+                maior_distancia = df['distancias'][i]
+                id_maior_distancia = df['id'][i]
+                
+        #print("1 maior distancia: ", id_maior_distancia)
+        df = df[df.id != id_maior_distancia]
+        df.reset_index(drop = True, inplace = True)
+        print("primeira exclusao\n",df)
+        
+        maior_distancia=0
+        for i in range(len(df)):
+            if df['distancias'][i] > maior_distancia:
+                maior_distancia = df['distancias'][i]
+                id_maior_distancia = df['id'][i]
+        
+        df = df[df.id != id_maior_distancia]
+        df.reset_index(drop = True, inplace = True)
+        print("segunda exclusao\n",df)
+        #print(df)
+                
+        #print(distancias)
+        return df
+        
+        
     def novaGeracao(df):
         
-        #calculo da pizza
-        #selecao de pais
-        #crossover entre pais
-        #https://www.youtube.com/watch?v=lcS-fv8tiEA
-        #add 3 filhos na população
-        #eliminar 3 piores
+        df = calculoDaPizza(df) #calculo da pizza
+        pai, mae = selecaoDePais(df) #selecao de pais
+        filho, filha = crossover(df,pai,mae)#crossover entre pais
+        df = addFilhosNaPopulacao(df,filho, filha)#add 3 filhos na população
+        df = elimina2piores(df) #eliminar 2 piores
+        print(df)
          
         return df
     
@@ -164,6 +272,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
     
 
     while run:
+        df = calculaFitness(df)
         for i in range(len(df)):
             screen.fill(preto)
             caminho = df['caminho'][i]
@@ -187,13 +296,20 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             
             texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (200, 670) # define a posição do centro do retangulo acima
+            textRect_dist.center = (200, 940) # define a posição do centro do retangulo acima
             screen.blit(texto_dist, textRect_dist)
             
+            texto_dist = font.render('geração: '+str(geracao), True, branco) # cria um objeto de superficie para a fonte
+            textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
+            textRect_dist.center = (900, 20) # define a posição do centro do retangulo acima
+            screen.blit(texto_dist, textRect_dist)
                 
             
             pygame.display.update()
-            time.sleep(2)
+            time.sleep(1)
+            
+        df = novaGeracao(df)
+        geracao+=1
             
     return record_distance
        
@@ -204,7 +320,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
        
        
        
-largura, altura = 700, 700
+largura, altura = 1000, 1000
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -245,8 +361,8 @@ pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
-#algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+#record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
     
  
     
