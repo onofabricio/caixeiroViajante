@@ -12,7 +12,7 @@ Ao iniciar o programa, 10 pontos serão gerados aleatoriamente (ou o valor que e
 
 ### Algoritmo de Força Bruta
 
-No caso trivial, este algoritmo verifica cada caminho possivel através da permutação de caminhos, o numero das possiveis combinações é n!, sendo n o numero de pontos do problema. Neste caso, temos 10 pontos e 3.628.800 caminhos possiveis. Para as primeiras iterações temos resultados incovenientes:
+No caso trivial, este algoritmo verifica cada caminho possivel através da permutação de caminhos, o numero das possiveis combinações é n!, sendo n o numero de pontos do problema. Neste caso, temos 10 pontos e 3.628.800 caminhos possiveis. Para as primeiras iterações temos resultados inconvenientes:
 
 ![primeiras_iteracoes](/assets/images/primeiras_iteracoes.jpg)
 
