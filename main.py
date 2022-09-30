@@ -107,11 +107,11 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             pygame.display.update()
             cont += 1
         print("Qtde de iterações", cont)
-        time.sleep(1000)
+        time.sleep(10)
         run = False
-        pygame.display.quit()
-        pygame.quit()
-        sys.exit()
+        #pygame.display.quit()
+        #pygame.quit()
+        #sys.exit()
     return record_distance
 
 
@@ -382,7 +382,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 10
+nr_de_pontos = 11
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
