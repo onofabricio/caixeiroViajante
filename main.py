@@ -173,29 +173,74 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         print("sorteio_mae: ",sorteio_mae," mae: ",mae)
         return pai, mae
     
+    def definePontosDeCrossover(df):
+        
+        a = random.randint(0, len(df['caminho'][0])-1)
+        b = a
+        while a == b:
+            b = random.randint(0, len(df['caminho'][0])-1)
+        if a<b:
+            pontos = [a,b]
+        elif a>b:
+            pontos = [b,a]
+            
+        return pontos
+        
+    def mutacao(vec):
+        
+        a = random.randint(0, len(vec)-1)
+        b = a
+        while a == b:
+            b = random.randint(0, len(vec)-1)
+            
+        aux = vec[a]
+        vec[a] = vec[b]
+        vec[b] = aux
+         
+         
+        return vec
     
     def crossover(df, pai, mae):
         
-        ponto_de_crossover = random.randint(1, len(df['caminho'][0])-1)
-        print("ponto de crossover", ponto_de_crossover)
-        
+        # 
         for i in range(len(df)):
             if df['id'][i] == pai:
                 caminho_pai = df['caminho'][i]
             elif df['id'][i] == mae:
                 caminho_mae = df['caminho'][i]
-        
-        
-        caminho_pai = caminho_pai[:-1]
+                
         caminho_mae = caminho_mae[:-1]
-        filho = caminho_pai.copy()
-        filha = caminho_mae.copy()
+        caminho_pai = caminho_pai[:-1] 
+          
+        pontos_de_crossover = definePontosDeCrossover(df)
+        print("pontos de crossover", pontos_de_crossover)
         
-        for i in range(ponto_de_crossover, len(caminho_pai)):
-            filho[i], filha[i] = caminho_mae[i], caminho_pai[i]
+        gameta_pai = caminho_pai[pontos_de_crossover[0]:pontos_de_crossover[1]]
+        gameta_mae = caminho_mae[pontos_de_crossover[0]:pontos_de_crossover[1]]
+        filho = caminho_pai[:pontos_de_crossover[0]]+gameta_mae+caminho_pai[pontos_de_crossover[1]:]
+        filha = caminho_mae[:pontos_de_crossover[0]]+gameta_pai+caminho_mae[pontos_de_crossover[1]:]
+        
+        filho = list(dict.fromkeys(filho))
+        filha = list(dict.fromkeys(filha))
+            
+        for i in range(len(caminho_pai)):
+            p = caminho_pai[i]
+            if p not in filho:
+                filho.append(p)
+                
+        for i in range(len(caminho_mae)):
+            p = caminho_mae[i]
+            if p not in filha:
+                filha.append(p)                
+        
+        #mutação
+        filho = mutacao(filho)
+        filha = mutacao(filha)
         
         filho.append(filho[0])
         filha.append(filha[0])
+        
+        
         
         
         return filho, filha
@@ -218,7 +263,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
     
     def elimina2piores(df):
         
-        print("original\n",df)
+        
         maior_distancia = 0
         for i in range(len(df)):
             if df['distancias'][i] > maior_distancia:
@@ -228,7 +273,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         #print("1 maior distancia: ", id_maior_distancia)
         df = df[df.id != id_maior_distancia]
         df.reset_index(drop = True, inplace = True)
-        print("primeira exclusao\n",df)
+        
         
         maior_distancia=0
         for i in range(len(df)):
@@ -238,7 +283,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         
         df = df[df.id != id_maior_distancia]
         df.reset_index(drop = True, inplace = True)
-        print("segunda exclusao\n",df)
+        
         #print(df)
                 
         #print(distancias)
@@ -248,31 +293,32 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
     def novaGeracao(df):
         
         df = calculoDaPizza(df) #calculo da pizza
+        #print("pedaco: \n",df)
         pai, mae = selecaoDePais(df) #selecao de pais
         filho, filha = crossover(df,pai,mae)#crossover entre pais
         df = addFilhosNaPopulacao(df,filho, filha)#add 3 filhos na população
         df = elimina2piores(df) #eliminar 2 piores
-        print(df)
+        #print("nova geração: \n",df)
          
         return df
     
-    cont=0
-    caminhos_possiveis = itertools.permutations(pontos)
+    
     font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
     record_distance = np.inf
-    record_cont = 0
+
     nr_de_cromossomos = 6
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
     distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
     ids = [i for i in range(1,len(populacao_inicial)+1)]
     df = pd.DataFrame(list(zip(ids, populacao_inicial, distancias)), columns = ['id','caminho', 'distancias'])
     df = calculaFitness(df)
-    print(df)
+
     
     
 
     while run:
         df = calculaFitness(df)
+        print("geracao ",geracao,": \n",df)
         for i in range(len(df)):
             screen.fill(preto)
             caminho = df['caminho'][i]
@@ -306,7 +352,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
                 
             
             pygame.display.update()
-            time.sleep(1)
+            #time.sleep(1)
             
         df = novaGeracao(df)
         geracao+=1
