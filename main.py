@@ -188,14 +188,29 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         
     def mutacao(vec):
         
-        a = random.randint(0, len(vec)-1)
-        b = a
-        while a == b:
-            b = random.randint(0, len(vec)-1)
-            
-        aux = vec[a]
-        vec[a] = vec[b]
-        vec[b] = aux
+        taxa_de_mutacao = 0.10
+        #10 pontos, tx = 0.8, geracao_convergente = não convergiu
+        #10 pontos, tx = 0.5, geracao_convergente = não convergiu
+        #10 pontos, tx = 0.25, geracao_convergente = 1100, solução não-planar
+        #10 pontos, tx = 0.15, geracao_convergente = 715
+        #10 pontos, tx = 0.10, geracao_convergente = 400
+        #15 pontos, tx = 0.8, geracao_convergente = não convergiu
+        #15 pontos, tx = 0.5, geracao_convergente = não convergiu
+        #15 pontos, tx = 0.25, geracao_convergente = não convergiu, mas achou solução ótima na geração 28000
+        #15 pontos, tx = 0.15, geracao_convergente = 3400
+        #15 pontos, tx = 0.10, geracao_convergente = 1100
+        iteracoes = taxa_de_mutacao*len(vec)
+        if iteracoes < 1:
+            iteracoes = 1
+        for i in range(int(iteracoes)):
+            a = random.randint(0, len(vec)-1)
+            b = a
+            while a == b:
+                b = random.randint(0, len(vec)-1)
+                
+            aux = vec[a]
+            vec[a] = vec[b]
+            vec[b] = aux
          
          
         return vec
@@ -337,17 +352,17 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             #Variaveis na tela
             texto_id = font.render('id cromossomo: '+str(df['id'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_id = texto_id.get_rect() # cria uma superficie retangular para texto 
-            textRect_id.center = (100, 20) # define a posição do centro do retangulo acima
+            textRect_id.center = (largura*0.2, altura*0.02) # define a posição do centro do retangulo acima
             screen.blit(texto_id, textRect_id)
             
             texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (200, 940) # define a posição do centro do retangulo acima
+            textRect_dist.center = (largura*0.2, altura*0.98) # define a posição do centro do retangulo acima
             screen.blit(texto_dist, textRect_dist)
             
             texto_dist = font.render('geração: '+str(geracao), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (900, 20) # define a posição do centro do retangulo acima
+            textRect_dist.center = (largura*0.9, altura*0.02) # define a posição do centro do retangulo acima
             screen.blit(texto_dist, textRect_dist)
                 
             
@@ -382,7 +397,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 11
+nr_de_pontos = 50
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
