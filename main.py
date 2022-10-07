@@ -8,7 +8,8 @@ import time
 import os
 import math
 import itertools
-import sys
+import networkx as nx
+import matplotlib
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
 
@@ -188,7 +189,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         
     def mutacao(vec):
         
-        taxa_de_mutacao = 0.10
+        taxa_de_mutacao = 0.01
         #10 pontos, tx = 0.8, geracao_convergente = não convergiu
         #10 pontos, tx = 0.5, geracao_convergente = não convergiu
         #10 pontos, tx = 0.25, geracao_convergente = 1100, solução não-planar
@@ -303,12 +304,44 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
                 
         #print(distancias)
         return df
+    
+    def verificaPlanar(df):
+        caminho = df['caminho'][0]
+        caminho = caminho[:-1]
+        print(caminho)
+        G = nx.Graph()
+        for i in range(len(caminho)-1):
+            G.add_node(i, pos=(caminho[n].x, caminho[n].y))
+            
+        for i in range(len(caminho)-1):
+            G.add_edge(i, i+1)
+        G.add_edge(len(caminho)-1, 0)
+            
+            
+        is_planar, P = nx.check_planarity(G)
+        print(is_planar)
+        print(G)
+        nx.draw(G)
+        time.sleep(10)
+        return 0
+    
+    def verificaConvergencia(df):
         
+        vec = []
+        for i in range(len(df)):
+            vec.append(df['distancias'][i])
+            
+        if len(set(vec)) == 1:
+            verificaPlanar(df)
+            
+        else:
+            pass
+        
+        return df
         
     def novaGeracao(df):
         
         df = calculoDaPizza(df) #calculo da pizza
-        #print("pedaco: \n",df)
         pai, mae = selecaoDePais(df) #selecao de pais
         filho, filha = crossover(df,pai,mae)#crossover entre pais
         df = addFilhosNaPopulacao(df,filho, filha)#add 3 filhos na população
@@ -368,8 +401,10 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             
             pygame.display.update()
             #time.sleep(1)
-            
+        
+           
         df = novaGeracao(df)
+        verificaConvergencia(df)
         geracao+=1
             
     return record_distance
@@ -397,7 +432,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 50
+nr_de_pontos = 20
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
