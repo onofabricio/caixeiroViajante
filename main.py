@@ -9,7 +9,7 @@ import os
 import math
 import itertools
 import networkx as nx
-import matplotlib
+import matplotlib.pyplot as plt
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
 
@@ -277,32 +277,20 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         return df
     
     
-    def elimina2piores(df):
+    def eliminaXpiores(df):
         
+        X = 2 #Numero de individuos a serem eliminados na seleção natural
+        for i in range(X):
+            maior_distancia = 0
+            for i in range(len(df)):
+                if df['distancias'][i] > maior_distancia:
+                    maior_distancia = df['distancias'][i]
+                    id_maior_distancia = df['id'][i]
+                    
+            #print("1 maior distancia: ", id_maior_distancia)
+            df = df[df.id != id_maior_distancia]
+            df.reset_index(drop = True, inplace = True)
         
-        maior_distancia = 0
-        for i in range(len(df)):
-            if df['distancias'][i] > maior_distancia:
-                maior_distancia = df['distancias'][i]
-                id_maior_distancia = df['id'][i]
-                
-        #print("1 maior distancia: ", id_maior_distancia)
-        df = df[df.id != id_maior_distancia]
-        df.reset_index(drop = True, inplace = True)
-        
-        
-        maior_distancia=0
-        for i in range(len(df)):
-            if df['distancias'][i] > maior_distancia:
-                maior_distancia = df['distancias'][i]
-                id_maior_distancia = df['id'][i]
-        
-        df = df[df.id != id_maior_distancia]
-        df.reset_index(drop = True, inplace = True)
-        
-        #print(df)
-                
-        #print(distancias)
         return df
     
     def verificaPlanar(df):
@@ -310,8 +298,8 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         caminho = caminho[:-1]
         print(caminho)
         G = nx.Graph()
-        for i in range(len(caminho)-1):
-            G.add_node(i, pos=(caminho[n].x, caminho[n].y))
+        for i in range(len(caminho)):
+            G.add_node(i, pos=(caminho[i].x, caminho[i].y))
             
         for i in range(len(caminho)-1):
             G.add_edge(i, i+1)
@@ -321,8 +309,12 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         is_planar, P = nx.check_planarity(G)
         print(is_planar)
         print(G)
-        nx.draw(G)
+        pos=nx.get_node_attributes(G,'pos')
+        print(pos)
+        nx.draw(G, pos)
+        plt.show()
         time.sleep(10)
+        
         return 0
     
     def verificaConvergencia(df):
@@ -345,7 +337,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         pai, mae = selecaoDePais(df) #selecao de pais
         filho, filha = crossover(df,pai,mae)#crossover entre pais
         df = addFilhosNaPopulacao(df,filho, filha)#add 3 filhos na população
-        df = elimina2piores(df) #eliminar 2 piores
+        df = eliminaXpiores(df) #eliminar X piores
         #print("nova geração: \n",df)
          
         return df
@@ -402,9 +394,8 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             pygame.display.update()
             #time.sleep(1)
         
-           
+        verificaConvergencia(df)   
         df = novaGeracao(df)
-        verificaConvergencia(df)
         geracao+=1
             
     return record_distance
@@ -432,7 +423,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 20
+nr_de_pontos = 26
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
