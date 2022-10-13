@@ -3,7 +3,6 @@ import pygame
 import random
 import numpy as np
 import pandas as pd
-from points import Point
 import time
 import os
 import math
@@ -11,6 +10,13 @@ import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
 os.environ["SDL_VIDEO_CENTERED"] = '1'
+
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.ordem = 0
 
 
 def DistanciaDe(a,b):
@@ -336,7 +342,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         df = calculoDaPizza(df) #calculo da pizza
         pai, mae = selecaoDePais(df) #selecao de pais
         filho, filha = crossover(df,pai,mae)#crossover entre pais
-        df = addFilhosNaPopulacao(df,filho, filha)#add 3 filhos na população
+        df = addFilhosNaPopulacao(df,filho, filha)#add 2 filhos na população
         df = eliminaXpiores(df) #eliminar X piores
         #print("nova geração: \n",df)
          
@@ -423,7 +429,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 26
+nr_de_pontos = 15
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
