@@ -9,6 +9,8 @@ import math
 import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
+from shapely.wkt import loads
+from shapely.geometry import LineString
 os.environ["SDL_VIDEO_CENTERED"] = '1'
 
 
@@ -299,10 +301,27 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         
         return df
     
-    def verificaPlanar(df):
+    
+    def apocalipse(df):
+        
+        sobrevivente = df.head(1)
+        print(sobrevivente)
+        populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
+        distancias = [calcula_distancia(caminho) for caminho in populacao_nova]
+        ids = [i for i in range(1,len(populacao_nova)+1)]
+        df = pd.DataFrame(list(zip(ids, populacao_nova, distancias)), columns = ['id','caminho', 'distancias'])
+        df = calculaFitness(df)
+        df = pd.concat([df,sobrevivente])
+        plt.show()
+        return df
+    
+    
+    def verificaPoligonoSimples(df):
         caminho = df['caminho'][0]
         caminho = caminho[:-1]
         print(caminho)
+        
+        
         G = nx.Graph()
         for i in range(len(caminho)):
             G.add_node(i, pos=(caminho[i].x, caminho[i].y))
@@ -310,27 +329,33 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         for i in range(len(caminho)-1):
             G.add_edge(i, i+1)
         G.add_edge(len(caminho)-1, 0)
+    
             
-            
-        is_planar, P = nx.check_planarity(G)
-        print(is_planar)
-        print(G)
-        pos=nx.get_node_attributes(G,'pos')
-        print(pos)
-        nx.draw(G, pos)
-        plt.show()
-        time.sleep(10)
+        pontos=nx.get_node_attributes(G,'pos')
+        print(pontos)
         
-        return 0
+        v = loads(LineString([pontos[i] for i in range(len(pontos))]).wkt)
+        
+        print("v", v)
+        if v.is_simple == True:
+            nx.draw(G, pontos)
+            plt.text(30, 0,'Solução ótima')
+            plt.show()
+            time.sleep(10)
+        else:
+            apocalipse(df)
+        
+        return df
     
     def verificaConvergencia(df):
         
         vec = []
         for i in range(len(df)):
-            vec.append(df['distancias'][i])
-            
+            vec.append(int(df['distancias'][i]))
+           
+        print("len(set(vec)): ",len(set(vec))) 
         if len(set(vec)) == 1:
-            verificaPlanar(df)
+            df = verificaPoligonoSimples(df)
             
         else:
             pass
@@ -429,7 +454,7 @@ pontos = []
 offset_screen = 50
 menor_caminho = []
 record_distance = 0
-nr_de_pontos = 15
+nr_de_pontos = 25
 
 #gera pontos aleatorios na screen
 for n in range(nr_de_pontos):
