@@ -126,7 +126,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
 
 
 
-def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run):
+def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run):
     
     geracao = 1
     def geraCaminhoAleatorio(pontos):
@@ -303,16 +303,17 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
     
     
     def apocalipse(df):
-        
+        print("=============APOCALIPSE=============")
         sobrevivente = df.head(1)
         print(sobrevivente)
-        populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
+        populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos-1)]
         distancias = [calcula_distancia(caminho) for caminho in populacao_nova]
         ids = [i for i in range(1,len(populacao_nova)+1)]
         df = pd.DataFrame(list(zip(ids, populacao_nova, distancias)), columns = ['id','caminho', 'distancias'])
         df = calculaFitness(df)
-        df = pd.concat([df,sobrevivente])
-        plt.show()
+        df = pd.concat([df,sobrevivente], ignore_index=True)
+        print("nova população\n",df)
+        time.sleep(10)
         return df
     
     
@@ -324,7 +325,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         
         G = nx.Graph()
         for i in range(len(caminho)):
-            G.add_node(i, pos=(caminho[i].x, caminho[i].y))
+            G.add_node(i, pos=(caminho[i].x, -caminho[i].y))
             
         for i in range(len(caminho)-1):
             G.add_edge(i, i+1)
@@ -343,7 +344,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             plt.show()
             time.sleep(10)
         else:
-            apocalipse(df)
+            df = apocalipse(df)
         
         return df
     
@@ -354,6 +355,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             vec.append(int(df['distancias'][i]))
            
         print("len(set(vec)): ",len(set(vec))) 
+        
         if len(set(vec)) == 1:
             df = verificaPoligonoSimples(df)
             
@@ -375,7 +377,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
     
     
     font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
-    record_distance = np.inf
+    distancia_gravada = np.inf
 
     nr_de_cromossomos = 6
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
@@ -391,7 +393,7 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
         df = calculaFitness(df)
         print("geracao ",geracao,": \n",df)
         for i in range(len(df)):
-            screen.fill(preto)
+            tela.fill(preto)
             caminho = df['caminho'][i]
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -400,36 +402,41 @@ def algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, ve
             #desenha pontos
             
             for n in range(len(pontos)):
-                pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
+                pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 10)
                 
             for m in range(len(caminho)-1):
-                pygame.draw.line(screen, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
+                pygame.draw.line(tela, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
             
             #Variaveis na tela
             texto_id = font.render('id cromossomo: '+str(df['id'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_id = texto_id.get_rect() # cria uma superficie retangular para texto 
             textRect_id.center = (largura*0.2, altura*0.02) # define a posição do centro do retangulo acima
-            screen.blit(texto_id, textRect_id)
+            tela.blit(texto_id, textRect_id)
             
             texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
             textRect_dist.center = (largura*0.2, altura*0.98) # define a posição do centro do retangulo acima
-            screen.blit(texto_dist, textRect_dist)
+            tela.blit(texto_dist, textRect_dist)
             
             texto_dist = font.render('geração: '+str(geracao), True, branco) # cria um objeto de superficie para a fonte
             textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
             textRect_dist.center = (largura*0.9, altura*0.02) # define a posição do centro do retangulo acima
-            screen.blit(texto_dist, textRect_dist)
+            tela.blit(texto_dist, textRect_dist)
+            
+            texto_indiv = font.render('individuos diferentes: '+str(len(set([df['distancias'][i] for i in range(len(df))]))), True, branco) # cria um objeto de superficie para a fonte
+            textRect_indiv = texto_indiv.get_rect() # cria uma superficie retangular para texto 
+            textRect_indiv.center = (largura*0.8, altura*0.98) # define a posição do centro do retangulo acima
+            tela.blit(texto_indiv, textRect_indiv)
                 
             
             pygame.display.update()
             #time.sleep(1)
         
-        verificaConvergencia(df)   
+        df = verificaConvergencia(df)   
         df = novaGeracao(df)
         geracao+=1
             
-    return record_distance
+    return distancia_gravada
        
        
        
@@ -447,19 +454,19 @@ verde = (0,255,0)
 #pygame settings
 pygame.init()
 pygame.display.set_caption("Problema do Caixeiro Viajante")
-screen = pygame.display.set_mode((largura, altura))
+tela = pygame.display.set_mode((largura, altura))
 
 #variaveis 
 pontos = []
-offset_screen = 50
+margem = 50
 menor_caminho = []
-record_distance = 0
-nr_de_pontos = 25
+distancia_gravada = 0
+nr_de_pontos = 10
 
-#gera pontos aleatorios na screen
+#gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
-    x = random.randint(offset_screen, largura - offset_screen)
-    y = random.randint(offset_screen, altura - offset_screen)
+    x = random.randint(margem, largura - margem)
+    y = random.randint(margem, altura - margem)
     
     point = Point(x,y)
     pontos.append(point)
@@ -467,21 +474,21 @@ for n in range(nr_de_pontos):
     
 caminho = constroiCaminho(pontos)
 dist = calcula_distancia(caminho)
-record_distance = dist
+distancia_gravada = dist
 menor_caminho = pontos.copy()
 
 run = True
 
 #Exibição dos pontos
 for n in range(len(pontos)):
-        pygame.draw.circle(screen, branco, (pontos[n].x, pontos[n].y), 10)
+        pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 10)
 pygame.display.update()
 time.sleep(3)
 
 #inicio das iterações por força bruta
-#record_distance = forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
-algoritmoGenetico(pontos, record_distance, menor_caminho, screen ,branco, verde, preto, run)
+#distancia_gravada = forcaBruta(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
+algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
     
  
     
-print("A menor distancia é: ", record_distance)
+print("A menor distancia é: ", distancia_gravada)
