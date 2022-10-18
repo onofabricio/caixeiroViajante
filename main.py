@@ -63,7 +63,7 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
     
     cont=0
     caminhos_possiveis = itertools.permutations(pontos)
-    font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
+    font = pygame.font.SysFont('bahnschrift', int(largura*0.025)) #fonte a ser usada nas variaveis
     record_distance = np.inf
     record_cont = 0
 
@@ -104,13 +104,13 @@ def forcaBruta(pontos, record_distance, menor_caminho, screen ,branco, verde, pr
             #Variaveis na tela
             texto_iteracao = font.render(str(cont+1)+'/'+str(np.math.factorial(len(pontos))), True, branco) # cria um objeto de superficie para a fonte
             textRect_iteracao = texto_iteracao.get_rect() # cria uma superficie retangular para texto 
-            textRect_iteracao.center = (100, 20) # define a posição do centro do retangulo acima
+            textRect_iteracao.center = (largura*0.1, altura*0.02) # define a posição do centro do retangulo acima
             screen.blit(texto_iteracao, textRect_iteracao)
             
             
-            texto_menorcaminho = font.render('iteração: '+str(record_cont+1)+' || distancia do menor caminho: '+str(record_distance), True, branco)
+            texto_menorcaminho = font.render('iteração: '+str(record_cont)+' || distancia do menor caminho: '+str(record_distance), True, branco)
             textRect_menorcaminho = texto_menorcaminho.get_rect()
-            textRect_menorcaminho.center = (400, 940)
+            textRect_menorcaminho.center = (largura*0.4, altura*0.94)
             screen.blit(texto_menorcaminho, textRect_menorcaminho)
             
             pygame.display.update()
@@ -178,8 +178,8 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
                 if sorteio_mae < df['pedaco'][i]:
                     mae = df['id'][i]
                     break
-        print("sorteio_pai: ",sorteio_pai," pai: ",pai)
-        print("sorteio_mae: ",sorteio_mae," mae: ",mae)
+        #print("sorteio_pai: ",sorteio_pai," pai: ",pai)
+        #print("sorteio_mae: ",sorteio_mae," mae: ",mae)
         return pai, mae
     
     def definePontosDeCrossover(df):
@@ -237,7 +237,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         caminho_pai = caminho_pai[:-1] 
           
         pontos_de_crossover = definePontosDeCrossover(df)
-        print("pontos de crossover", pontos_de_crossover)
+        #print("pontos de crossover", pontos_de_crossover)
         
         gameta_pai = caminho_pai[pontos_de_crossover[0]:pontos_de_crossover[1]]
         gameta_mae = caminho_mae[pontos_de_crossover[0]:pontos_de_crossover[1]]
@@ -303,16 +303,16 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     
     def apocalipse(df):
-        print("=============APOCALIPSE=============")
+        #print("=============APOCALIPSE=============")
         sobrevivente = df.head(1)
-        print(sobrevivente)
+        #print(sobrevivente)
         populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos-1)]
         distancias = [calcula_distancia(caminho) for caminho in populacao_nova]
         ids = [i for i in range(1,len(populacao_nova)+1)]
         df = pd.DataFrame(list(zip(ids, populacao_nova, distancias)), columns = ['id','caminho', 'distancias'])
         df = calculaFitness(df)
         df = pd.concat([df,sobrevivente], ignore_index=True)
-        print("nova população\n",df)
+        #print("nova população\n",df)
         time.sleep(10)
         return df
     
@@ -333,11 +333,11 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
             
         pontos=nx.get_node_attributes(G,'pos')
-        print(pontos)
+        #print(pontos)
         
         v = loads(LineString([pontos[i] for i in range(len(pontos))]).wkt)
         
-        print("v", v)
+        #print("v", v)
         if v.is_simple == True:
             nx.draw(G, pontos)
             plt.text(30, 0,'Solução ótima')
@@ -354,7 +354,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         for i in range(len(df)):
             vec.append(int(df['distancias'][i]))
            
-        print("len(set(vec)): ",len(set(vec))) 
+        #print("len(set(vec)): ",len(set(vec))) 
         
         if len(set(vec)) == 1:
             df = verificaPoligonoSimples(df)
@@ -376,10 +376,10 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         return df
     
     
-    font = pygame.font.SysFont('bahnschrift', 24) #fonte a ser usada nas variaveis
+    font = pygame.font.SysFont('bahnschrift', int(altura*0.025)) #fonte a ser usada nas variaveis
     distancia_gravada = np.inf
 
-    nr_de_cromossomos = 6
+    nr_de_cromossomos = int(0.5*nr_de_pontos)
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
     distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
     ids = [i for i in range(1,len(populacao_inicial)+1)]
@@ -391,7 +391,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
 
     while run:
         df = calculaFitness(df)
-        print("geracao ",geracao,": \n",df)
+        #print("geracao ",geracao,": \n",df)
         for i in range(len(df)):
             tela.fill(preto)
             caminho = df['caminho'][i]
@@ -445,7 +445,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
        
        
        
-largura, altura = 1000, 1000
+largura, altura = 700, 700
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -453,7 +453,7 @@ verde = (0,255,0)
 
 #pygame settings
 pygame.init()
-pygame.display.set_caption("Problema do Caixeiro Viajante")
+pygame.display.set_caption("Problema do Caixeiro Viajante") 
 tela = pygame.display.set_mode((largura, altura))
 
 #variaveis 
@@ -461,7 +461,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 10
+nr_de_pontos = 15
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
