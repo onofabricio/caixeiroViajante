@@ -9,6 +9,7 @@ import math
 import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
+from pyparsing import condition_as_parse_action
 from shapely.wkt import loads
 from shapely.geometry import LineString
 os.environ["SDL_VIDEO_CENTERED"] = '1'
@@ -241,42 +242,41 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         
         gameta_pai = caminho_pai[pontos_de_crossover[0]:pontos_de_crossover[1]]
         gameta_mae = caminho_mae[pontos_de_crossover[0]:pontos_de_crossover[1]]
-        filho = caminho_pai[:pontos_de_crossover[0]]+gameta_mae+caminho_pai[pontos_de_crossover[1]:]
-        filha = caminho_mae[:pontos_de_crossover[0]]+gameta_pai+caminho_mae[pontos_de_crossover[1]:]
-        
-        filho = list(dict.fromkeys(filho))
-        filha = list(dict.fromkeys(filha))
-            
-        for i in range(len(caminho_pai)):
-            p = caminho_pai[i]
-            if p not in filho:
-                filho.append(p)
-                
-        for i in range(len(caminho_mae)):
-            p = caminho_mae[i]
-            if p not in filha:
-                filha.append(p)                
+        filho1 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+gameta_mae+caminho_pai[pontos_de_crossover[1]:]))
+        filho2 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+gameta_pai+caminho_mae[pontos_de_crossover[1]:]))
+        filho3 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[1]]+caminho_mae[pontos_de_crossover[1]:]))
+        filho4 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[1]]+caminho_pai[pontos_de_crossover[1]:]))
+        filho5 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+caminho_mae[pontos_de_crossover[0]:]))
+        filho6 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+caminho_pai[pontos_de_crossover[0]:]))
+    
+        filhos = [filho1,filho2,filho3,filho4, filho5, filho6]
+        for filho in filhos:    
+            for i in range(len(caminho_pai)):
+                p = caminho_pai[i]
+                if p not in filho:
+                    filho.append(p)
+        for filho in filhos:         
+            for i in range(len(caminho_mae)):
+                p = caminho_mae[i]
+                if p not in filho:
+                    filho.append(p)                
         
         #mutação
-        filho = mutacao(filho)
-        filha = mutacao(filha)
-        
-        filho.append(filho[0])
-        filha.append(filha[0])
+        for filho in filhos:
+            filho = mutacao(filho)
+            filho.append(filho[0])
         
         
-        
-        
-        return filho, filha
+        return filhos
          
         
-    def addFilhosNaPopulacao(df, filho, filha):
+    def addFilhosNaPopulacao(df, filhos):
         
-        novos_caminhos = [filho, filha]
-        novos_ids = [max(df['id'])+1, max(df['id'])+2]
-        novas_distancias = [calcula_distancia(filho), calcula_distancia(filha)]
-        novos_fitness = [0,0]
-        novos_pedacos = [0,0]
+        novos_caminhos = [filho for filho in filhos]
+        novos_ids = [max(df['id'])+i for i in range(1,len(filhos)+1)]
+        novas_distancias = [calcula_distancia(filho) for filho in filhos]
+        novos_fitness = [0 for i in range(len(filhos))]
+        novos_pedacos = [0 for i in range(len(filhos))]
         
         novo_df = pd.DataFrame(list(zip(novos_ids, novos_caminhos, novas_distancias, novos_fitness, novos_pedacos)), columns = ['id','caminho', 'distancias','fitness','pedaco'])
         
@@ -287,7 +287,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     def eliminaXpiores(df):
         
-        X = 2 #Numero de individuos a serem eliminados na seleção natural
+        X = 6 #Numero de individuos a serem eliminados na seleção natural
         for i in range(X):
             maior_distancia = 0
             for i in range(len(df)):
@@ -342,11 +342,13 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
             nx.draw(G, pontos)
             plt.text(30, 0,'Solução ótima')
             plt.show()
-            time.sleep(10)
+            cond = True
+            #time.sleep(10)
         else:
             df = apocalipse(df)
+            cond = False
         
-        return df
+        return df, cond
     
     def verificaConvergencia(df):
         
@@ -357,19 +359,20 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         #print("len(set(vec)): ",len(set(vec))) 
         
         if len(set(vec)) == 1:
-            df = verificaPoligonoSimples(df)
+            df, cond = verificaPoligonoSimples(df)
             
         else:
+            cond = False
             pass
         
-        return df
+        return df, cond
         
     def novaGeracao(df):
         
         df = calculoDaPizza(df) #calculo da pizza
         pai, mae = selecaoDePais(df) #selecao de pais
-        filho, filha = crossover(df,pai,mae)#crossover entre pais
-        df = addFilhosNaPopulacao(df,filho, filha)#add 2 filhos na população
+        filhos = crossover(df,pai,mae)#crossover entre pais
+        df = addFilhosNaPopulacao(df,filhos)#add filhos na população
         df = eliminaXpiores(df) #eliminar X piores
         #print("nova geração: \n",df)
          
@@ -379,7 +382,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     font = pygame.font.SysFont('bahnschrift', int(altura*0.025)) #fonte a ser usada nas variaveis
     distancia_gravada = np.inf
 
-    nr_de_cromossomos = int(0.5*nr_de_pontos)
+    nr_de_cromossomos = 6#int(0.5*nr_de_pontos)
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
     distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
     ids = [i for i in range(1,len(populacao_inicial)+1)]
@@ -432,7 +435,10 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
             pygame.display.update()
             #time.sleep(1)
         
-        df = verificaConvergencia(df)   
+        df, cond = verificaConvergencia(df)   
+        distancia_gravada = min([d for d in df['distancias']])
+        if cond == True: break 
+        #print(df)
         df = novaGeracao(df)
         geracao+=1
             
@@ -461,7 +467,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 15
+nr_de_pontos = 22
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
@@ -485,10 +491,12 @@ for n in range(len(pontos)):
 pygame.display.update()
 time.sleep(3)
 
+agr = time.time()
 #inicio das iterações por força bruta
 #distancia_gravada = forcaBruta(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
 algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
     
- 
+dps = time.time() - agr
+print("tempo de execução: ", dps)
     
 print("A menor distancia é: ", distancia_gravada)
