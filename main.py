@@ -304,14 +304,14 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     def apocalipse(df):
         #print("=============APOCALIPSE=============")
-        sobrevivente = df.head(1)
+        #sobrevivente = df.head(1)
         #print(sobrevivente)
-        populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos-1)]
+        populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
         distancias = [calcula_distancia(caminho) for caminho in populacao_nova]
         ids = [i for i in range(1,len(populacao_nova)+1)]
         df = pd.DataFrame(list(zip(ids, populacao_nova, distancias)), columns = ['id','caminho', 'distancias'])
         df = calculaFitness(df)
-        df = pd.concat([df,sobrevivente], ignore_index=True)
+        #df = pd.concat([df,sobrevivente], ignore_index=True)
         #print("nova população\n",df)
         time.sleep(10)
         return df
@@ -340,7 +340,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         #print("v", v)
         if v.is_simple == True:
             nx.draw(G, pontos)
-            plt.text(30, 0,'Solução ótima')
+            plt.text(min([ponto.x for ponto in df['caminho'][0]]) - 10, - (max([ponto.y for ponto in df['caminho'][0]]) + 10),'Solução ótima')
             plt.show()
             cond = True
             #time.sleep(10)
@@ -451,7 +451,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
        
        
        
-largura, altura = 700, 700
+largura, altura = 1000, 700
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -467,7 +467,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 22
+nr_de_pontos = 20
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
