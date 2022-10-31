@@ -20,6 +20,11 @@ class Point:
         self.x = x
         self.y = y
         self.ordem = 0
+        self.nome = ""
+        
+    def defineNome(self, nome):
+        self.nome = nome
+        return self
 
 
 def DistanciaDe(a,b):
@@ -185,10 +190,10 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     def definePontosDeCrossover(df):
         
-        a = random.randint(0, len(df['caminho'][0])-1)
+        a = random.randint(0, len(df['caminho'][0]))
         b = a
         while a == b:
-            b = random.randint(0, len(df['caminho'][0])-1)
+            b = random.randint(0, len(df['caminho'][0]))
         if a<b:
             pontos = [a,b]
         elif a>b:
@@ -269,7 +274,10 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         
         return filhos
          
-        
+        #3030
+        #4277
+        #3488
+        #3143
     def addFilhosNaPopulacao(df, filhos):
         
         novos_caminhos = [filho for filho in filhos]
@@ -303,7 +311,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     
     def apocalipse(df):
-        #print("=============APOCALIPSE=============")
+        print("=============APOCALIPSE=============")
         #sobrevivente = df.head(1)
         #print(sobrevivente)
         populacao_nova = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
@@ -340,7 +348,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         #print("v", v)
         if v.is_simple == True:
             nx.draw(G, pontos)
-            plt.text(min([ponto.x for ponto in df['caminho'][0]]) - 10, - (max([ponto.y for ponto in df['caminho'][0]]) + 10),'Solução ótima')
+            plt.text(min([ponto.x for ponto in df['caminho'][0]]) - 10,  -(min([ponto.y for ponto in df['caminho'][0]]) - 10),'Solução ótima')
             plt.show()
             cond = True
             #time.sleep(10)
@@ -382,7 +390,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     font = pygame.font.SysFont('bahnschrift', int(altura*0.025)) #fonte a ser usada nas variaveis
     distancia_gravada = np.inf
 
-    nr_de_cromossomos = 6#int(0.5*nr_de_pontos)
+    nr_de_cromossomos = int(0.5*nr_de_pontos)
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
     distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
     ids = [i for i in range(1,len(populacao_inicial)+1)]
@@ -462,12 +470,12 @@ pygame.init()
 pygame.display.set_caption("Problema do Caixeiro Viajante") 
 tela = pygame.display.set_mode((largura, altura))
 
-#variaveis 
+#variaveis
 pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 20
+nr_de_pontos = 15
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
