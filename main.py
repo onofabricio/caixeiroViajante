@@ -200,7 +200,17 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
             pontos = [b,a]
             
         return pontos
+     
+    def definePontosDeCrossoverV2(lista):
         
+        pontos_de_crossover = [0 for i in range(int(len(lista)/3))]
+        while len(set(pontos_de_crossover)) < len(pontos_de_crossover):
+            pontos_de_crossover = [random.randint(0, len(lista)-1) for i in range((int(len(lista)/3))-1)] 
+        pontos_de_crossover = [None] + sorted(pontos_de_crossover) + [None]
+        
+        return pontos_de_crossover
+        
+           
     def mutacao(vec):
         
         taxa_de_mutacao = 0.01
@@ -232,7 +242,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     def crossover(df, pai, mae):
         
-        # 
+        
         for i in range(len(df)):
             if df['id'][i] == pai:
                 caminho_pai = df['caminho'][i]
@@ -242,7 +252,8 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         caminho_mae = caminho_mae[:-1]
         caminho_pai = caminho_pai[:-1] 
           
-        pontos_de_crossover = definePontosDeCrossover(df)
+        pontos_de_crossover = definePontosDeCrossover(df) # 2 pontos fixos
+        #pontos_de_crossover = definePontosDeCrossoverV2(caminho_mae) # X pontos, de acordo com o tamanho do caminho
         #print("pontos de crossover", pontos_de_crossover)
         
         gameta_pai = caminho_pai[pontos_de_crossover[0]:pontos_de_crossover[1]]
@@ -254,7 +265,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         filho5 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+caminho_mae[pontos_de_crossover[0]:]))
         filho6 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+caminho_pai[pontos_de_crossover[0]:]))
     
-        filhos = [filho1,filho2,filho3,filho4, filho5, filho6]
+        filhos = [filho1, filho2, filho3, filho4, filho5, filho6]
         for filho in filhos:    
             for i in range(len(caminho_pai)):
                 p = caminho_pai[i]
@@ -274,11 +285,62 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         
         return filhos
          
-        #3030
-        #4277
-        #3488
-        #3143
+    def crossoverV2(df, pai, mae):
+        
+        for i in range(len(df)):
+            if df['id'][i] == pai:
+                caminho_pai = df['caminho'][i]
+            elif df['id'][i] == mae:
+                caminho_mae = df['caminho'][i]
+                
+        caminho_mae = caminho_mae[:-1]
+        caminho_pai = caminho_pai[:-1] 
+        
+        
+        
+        pontos_de_crossover = definePontosDeCrossoverV2(caminho_mae) # X pontos, de acordo com o tamanho do caminho
+        
+        #print(pontos_de_crossover)
+
+        filhos = {}
+        pedaco_pai = {}
+        pedaco_mae = {}
+        
+        for i in range(len(pontos_de_crossover)-1):
+            pedaco_pai[i] = caminho_pai[pontos_de_crossover[i]:pontos_de_crossover[i+1]]
+            pedaco_mae[i] = caminho_mae[pontos_de_crossover[i]:pontos_de_crossover[i+1]]
+        
+        #print(pedaco_mae)
+        #print(pedaco_pai)
+            
+        filhos = [list(itertools.chain.from_iterable(i)) for i in itertools.product(*zip(pedaco_pai.values(), pedaco_mae.values()))]
+        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        #print(filhos[0])
+        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        
+        for filho in filhos:
+            for i in range(len(caminho_pai)):
+                p = caminho_pai[i]
+                if p not in filho:
+                    filho.append(p)
+        for filho in filhos:
+            for i in range(len(caminho_mae)):
+                p = caminho_mae[i]
+                if p not in filho:
+                    filho.append(p)
+        
+        #mutação
+        #print(filhos)
+        for filho in filhos:
+            filho = mutacao(filho)
+            filho.append(filho[0])
+        #print("="*20)
+        #print(filhos)
+        return filhos
+    
+    
     def addFilhosNaPopulacao(df, filhos):
+        
         
         novos_caminhos = [filho for filho in filhos]
         novos_ids = [max(df['id'])+i for i in range(1,len(filhos)+1)]
@@ -293,9 +355,9 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         return df
     
     
-    def eliminaXpiores(df):
+    def eliminaXpiores(df, filhos):
         
-        X = 6 #Numero de individuos a serem eliminados na seleção natural
+        X = len(filhos) #Numero de individuos a serem eliminados na seleção natural
         for i in range(X):
             maior_distancia = 0
             for i in range(len(df)):
@@ -379,9 +441,10 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         
         df = calculoDaPizza(df) #calculo da pizza
         pai, mae = selecaoDePais(df) #selecao de pais
-        filhos = crossover(df,pai,mae)#crossover entre pais
+        #filhos = crossover(df,pai,mae)#crossover entre pais
+        filhos = crossoverV2(df,pai,mae)
         df = addFilhosNaPopulacao(df,filhos)#add filhos na população
-        df = eliminaXpiores(df) #eliminar X piores
+        df = eliminaXpiores(df, filhos) #eliminar X piores
         #print("nova geração: \n",df)
          
         return df
@@ -452,11 +515,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
             
     return distancia_gravada
        
-       
-       
-       
-       
-       
+         
        
        
 largura, altura = 1000, 700
@@ -475,7 +534,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 15
+nr_de_pontos = 13
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
@@ -505,6 +564,6 @@ agr = time.time()
 algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
     
 dps = time.time() - agr
-print("tempo de execução: ", dps)
+print("tempo de execução: ", dps)    
     
 print("A menor distancia é: ", distancia_gravada)
