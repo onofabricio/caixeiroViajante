@@ -203,11 +203,17 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
      
     def definePontosDeCrossoverV2(lista):
         
-        pontos_de_crossover = [0 for i in range(int(len(lista)/3))]
+        #f(x) = x^0.4
+        taxa_de_crossover = 0.4
+        print("qtes de pontos de cross", int(len(lista)**(taxa_de_crossover)))
+        qtde = int(len(lista)**(taxa_de_crossover))
+        qtde = 3
+        pontos_de_crossover = [0 for i in range(qtde)]
+    
         while len(set(pontos_de_crossover)) < len(pontos_de_crossover):
-            pontos_de_crossover = [random.randint(0, len(lista)-1) for i in range((int(len(lista)/3))-1)] 
+            pontos_de_crossover = [random.randint(0, len(lista)-1) for i in range(qtde)] 
         pontos_de_crossover = [None] + sorted(pontos_de_crossover) + [None]
-        
+        print(pontos_de_crossover)
         return pontos_de_crossover
         
            
@@ -338,6 +344,57 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         #print(filhos)
         return filhos
     
+    def crossoverV3(df,pai,mae):
+        
+        #Simple inversion crossover (Holland) 
+        
+        for i in range(len(df)):
+            if df['id'][i] == pai:
+                caminho_pai = df['caminho'][i]
+            elif df['id'][i] == mae:
+                caminho_mae = df['caminho'][i]
+                
+        caminho_mae = caminho_mae[:-1]
+        caminho_pai = caminho_pai[:-1] 
+          
+        pontos_de_crossover = definePontosDeCrossover(df) # 2 pontos fixos
+        
+        gameta_pai = caminho_pai[pontos_de_crossover[0]:pontos_de_crossover[1]]
+        gameta_mae = caminho_mae[pontos_de_crossover[0]:pontos_de_crossover[1]]
+        filho1 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+gameta_mae+caminho_pai[pontos_de_crossover[1]:]))
+        filho2 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+gameta_pai+caminho_mae[pontos_de_crossover[1]:]))
+        filho3 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[1]]+caminho_mae[pontos_de_crossover[1]:]))
+        filho4 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[1]]+caminho_pai[pontos_de_crossover[1]:]))
+        filho5 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+caminho_mae[pontos_de_crossover[0]:]))
+        filho6 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+caminho_pai[pontos_de_crossover[0]:]))
+        #V3
+       
+        
+        
+        filho7 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+list(reversed(gameta_pai))+caminho_pai[pontos_de_crossover[1]:]))
+        filho8 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+list(reversed(gameta_mae))+caminho_mae[pontos_de_crossover[1]:]))
+
+        filho9 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+list(reversed(gameta_mae))+caminho_pai[pontos_de_crossover[1]:]))
+        filho10 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+list(reversed(gameta_pai))+caminho_mae[pontos_de_crossover[1]:]))
+    
+        filhos = [filho1, filho2, filho3, filho4, filho5, filho6, filho7, filho8, filho9, filho10]
+        for filho in filhos:    
+            for i in range(len(caminho_pai)):
+                p = caminho_pai[i]
+                if p not in filho:
+                    filho.append(p)
+        for filho in filhos:         
+            for i in range(len(caminho_mae)):
+                p = caminho_mae[i]
+                if p not in filho:
+                    filho.append(p)                
+        
+        #mutação
+        for filho in filhos:
+            filho = mutacao(filho)
+            filho.append(filho[0])
+        
+        return filhos
     
     def addFilhosNaPopulacao(df, filhos):
         
@@ -442,7 +499,8 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         df = calculoDaPizza(df) #calculo da pizza
         pai, mae = selecaoDePais(df) #selecao de pais
         #filhos = crossover(df,pai,mae)#crossover entre pais
-        filhos = crossoverV2(df,pai,mae)
+        #filhos = crossoverV2(df,pai,mae)
+        filhos = crossoverV3(df,pai,mae)
         df = addFilhosNaPopulacao(df,filhos)#add filhos na população
         df = eliminaXpiores(df, filhos) #eliminar X piores
         #print("nova geração: \n",df)
@@ -518,7 +576,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
          
        
        
-largura, altura = 1000, 700
+largura, altura = 1400, 900
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -534,7 +592,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 13
+nr_de_pontos = 100
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
