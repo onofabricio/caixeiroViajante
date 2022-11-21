@@ -367,13 +367,11 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
         filho4 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[1]]+caminho_pai[pontos_de_crossover[1]:]))
         filho5 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+caminho_mae[pontos_de_crossover[0]:]))
         filho6 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+caminho_pai[pontos_de_crossover[0]:]))
+        
         #V3
        
-        
-        
         filho7 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+list(reversed(gameta_pai))+caminho_pai[pontos_de_crossover[1]:]))
         filho8 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+list(reversed(gameta_mae))+caminho_mae[pontos_de_crossover[1]:]))
-
         filho9 = list(dict.fromkeys(caminho_pai[:pontos_de_crossover[0]]+list(reversed(gameta_mae))+caminho_pai[pontos_de_crossover[1]:]))
         filho10 = list(dict.fromkeys(caminho_mae[:pontos_de_crossover[0]]+list(reversed(gameta_pai))+caminho_mae[pontos_de_crossover[1]:]))
     
@@ -510,8 +508,9 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
     
     font = pygame.font.SysFont('bahnschrift', int(altura*0.025)) #fonte a ser usada nas variaveis
     distancia_gravada = np.inf
+    
 
-    nr_de_cromossomos = int(0.5*nr_de_pontos)
+    nr_de_cromossomos = int(0.5*len(pontos))
     populacao_inicial = [geraCaminhoAleatorio(pontos) for i in range(nr_de_cromossomos)]
     distancias = [calcula_distancia(caminho) for caminho in populacao_inicial]
     ids = [i for i in range(1,len(populacao_inicial)+1)]
@@ -520,50 +519,59 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
 
     
     
-
+    print(geracao,"\n", len(df))
+    time.sleep(3)
     while run:
         df = calculaFitness(df)
         #print("geracao ",geracao,": \n",df)
-        for i in range(len(df)):
-            tela.fill(preto)
-            caminho = df['caminho'][i]
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-            
-            #desenha pontos
-            
-            for n in range(len(pontos)):
-                pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 10)
+        if len(df) < 100:
+            for i in range(len(df)):
+                tela.fill(preto)
+                caminho = df['caminho'][i]
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
                 
-            for m in range(len(caminho)-1):
-                pygame.draw.line(tela, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
-            
-            #Variaveis na tela
-            texto_id = font.render('id cromossomo: '+str(df['id'][i]), True, branco) # cria um objeto de superficie para a fonte
-            textRect_id = texto_id.get_rect() # cria uma superficie retangular para texto 
-            textRect_id.center = (largura*0.2, altura*0.02) # define a posição do centro do retangulo acima
-            tela.blit(texto_id, textRect_id)
-            
-            texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
-            textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (largura*0.2, altura*0.98) # define a posição do centro do retangulo acima
-            tela.blit(texto_dist, textRect_dist)
-            
-            texto_dist = font.render('geração: '+str(geracao), True, branco) # cria um objeto de superficie para a fonte
-            textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
-            textRect_dist.center = (largura*0.9, altura*0.02) # define a posição do centro do retangulo acima
-            tela.blit(texto_dist, textRect_dist)
-            
-            texto_indiv = font.render('individuos diferentes: '+str(len(set([df['distancias'][i] for i in range(len(df))]))), True, branco) # cria um objeto de superficie para a fonte
-            textRect_indiv = texto_indiv.get_rect() # cria uma superficie retangular para texto 
-            textRect_indiv.center = (largura*0.8, altura*0.98) # define a posição do centro do retangulo acima
-            tela.blit(texto_indiv, textRect_indiv)
+                #desenha pontos
                 
+                for n in range(len(pontos)):
+                    pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 5)
+                    texto_nome = font.render(''+str(pontos[n].nome), True, branco) # cria um objeto de superficie para a fonte
+                    textRect_nome = texto_nome.get_rect() # cria uma superficie retangular para texto 
+                    textRect_nome.center = (pontos[n].x, pontos[n].y - 20) # define a posição do centro do retangulo acima
+                    tela.blit(texto_nome, textRect_nome)
+                    
+                for m in range(len(caminho)-1):
+                    pygame.draw.line(tela, branco, (caminho[m].x, caminho[m].y), (caminho[m+1].x, caminho[m+1].y), 1)
+                
+                #Variaveis na tela
+                texto_id = font.render('id cromossomo: '+str(df['id'][i]), True, branco) # cria um objeto de superficie para a fonte
+                textRect_id = texto_id.get_rect() # cria uma superficie retangular para texto 
+                textRect_id.center = (largura*0.2, altura*0.02) # define a posição do centro do retangulo acima
+                tela.blit(texto_id, textRect_id)
+                
+                texto_dist = font.render('distancia: '+str(df['distancias'][i]), True, branco) # cria um objeto de superficie para a fonte
+                textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
+                textRect_dist.center = (largura*0.2, altura*0.98) # define a posição do centro do retangulo acima
+                tela.blit(texto_dist, textRect_dist)
+                
+                texto_dist = font.render('geração: '+str(geracao), True, branco) # cria um objeto de superficie para a fonte
+                textRect_dist = texto_dist.get_rect() # cria uma superficie retangular para texto 
+                textRect_dist.center = (largura*0.9, altura*0.02) # define a posição do centro do retangulo acima
+                tela.blit(texto_dist, textRect_dist)
+                
+                texto_indiv = font.render('individuos diferentes: '+str(len(set([df['distancias'][i] for i in range(len(df))]))), True, branco) # cria um objeto de superficie para a fonte
+                textRect_indiv = texto_indiv.get_rect() # cria uma superficie retangular para texto 
+                textRect_indiv.center = (largura*0.8, altura*0.98) # define a posição do centro do retangulo acima
+                tela.blit(texto_indiv, textRect_indiv)
+                    
+                
+                pygame.display.update()
+                #time.sleep(1)
+        else:
+            print(geracao,"\n", df)
+            melhor_cromossomo = 0
             
-            pygame.display.update()
-            #time.sleep(1)
-        
         df, cond = verificaConvergencia(df)   
         distancia_gravada = min([d for d in df['distancias']])
         if cond == True: break 
@@ -576,7 +584,7 @@ def algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, ve
          
        
        
-largura, altura = 1400, 900
+largura, altura = 1600, 900
 #cores
 preto = (0,0,0)
 branco = (255,255,255)
@@ -592,7 +600,7 @@ pontos = []
 margem = 50
 menor_caminho = []
 distancia_gravada = 0
-nr_de_pontos = 100
+nr_de_pontos = 60
 
 #gera pontos aleatorios na tela
 for n in range(nr_de_pontos):
@@ -607,19 +615,46 @@ caminho = constroiCaminho(pontos)
 dist = calcula_distancia(caminho)
 distancia_gravada = dist
 menor_caminho = pontos.copy()
-
 run = True
+
+#capitais 
+capitais = {'AC': [ -8.77, -70.55]  , 'AL': [ -9.71, -35.73], 'AM': [ -3.07, -61.66]  , 
+            'AP': [  1.41, -51.77]  , 'BA': [-12.96, -38.51]  , 'CE': [ -3.71, -38.54]  , 
+            'DF': [-15.83, -47.86]  , 'ES': [-19.19, -40.34]  , 'GO': [-16.64, -49.31]  , 
+            'MA': [ -2.55, -44.30]  , 'MT': [-12.64, -55.42]  , 'MS': [-20.51, -54.54]  , 
+            'MG': [-18.10, -44.38]  , 'PA': [ -5.53, -52.29]  , 'PB': [ -7.06, -35.55]  , 
+            'PR': [-24.89, -51.55]  , 'PE': [ -8.28, -35.07]  , 'PI': [ -8.28, -43.68]  , 
+            'RJ': [-22.84, -43.15]  , 'RN': [ -5.22, -36.52]  , 'RO': [-11.22, -62.80]  , 
+            'RS': [-30.01, -51.22]  , 'RR': [  1.89, -61.22]  , 'SC': [-27.33, -49.44]  , 
+            'SE': [-10.90, -37.07] , 'SP': [-23.55, -46.64]  , 'TO': [-10.25, -48.25]}
+pontos=[]
+for estado in capitais:
+    capitais[estado] = (np.array(capitais[estado])*18)
+    capitais[estado][1] = capitais[estado][1]+1700
+    capitais[estado][0] = capitais[estado][0]*-1
+    capitais[estado][0] = capitais[estado][0]+250
+for estado in capitais:
+    x = capitais[estado][1]
+    y = capitais[estado][0]
+    nome = estado
+    point = Point(x,y).defineNome(nome)
+    pontos.append(point)
+    
+caminho = constroiCaminho(pontos)
+dist = calcula_distancia(caminho)
+distancia_gravada = dist
+menor_caminho = pontos.copy()
 
 #Exibição dos pontos
 for n in range(len(pontos)):
-        pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 10)
+        pygame.draw.circle(tela, branco, (pontos[n].x, pontos[n].y), 5)
 pygame.display.update()
 time.sleep(3)
 
 agr = time.time()
 #inicio das iterações por força bruta
 #distancia_gravada = forcaBruta(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
-algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
+distancia_gravada = algoritmoGenetico(pontos, distancia_gravada, menor_caminho, tela ,branco, verde, preto, run)
     
 dps = time.time() - agr
 print("tempo de execução: ", dps)    
