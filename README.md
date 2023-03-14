@@ -24,3 +24,9 @@ As retas em verde mostram o menor caminho calculado no momento, as retas em bran
 ![ultimas_iteracoes](/assets/images/ultimas_iteracoes.jpg)
 
 Visto que o numero de iterações desse algoritimo é igual ao numero de caminhos possiveis do problema, se tivermos um numero alto de pontos n, os caminhos serão processados até n!. O que o torna ineficiente e computacionalmente custoso para problemas mais elaborados, apesar de sua simplicidade lógica.
+
+### Algoritmo genético
+
+Em 1975, John H. Holland publicava *Adaptation in natural and artificial systems*, livro pioneiro nos algoritmos genéticos, que se baseiam na teoria neodarwinista para encontrar soluções em problemas de otimização combinatória. O algoritmo segue o seguinte esquema:
+
+![fluxograma][/assets/images/floxogramaAG.jpg]
