@@ -27,6 +27,14 @@ Visto que o numero de iterações desse algoritimo é igual ao numero de caminho
 
 ### Algoritmo genético
 
-Em 1975, John H. Holland publicava *Adaptation in natural and artificial systems*, livro pioneiro nos algoritmos genéticos, que se baseiam na teoria neodarwinista para encontrar soluções em problemas de otimização combinatória. O algoritmo segue o seguinte esquema:
+Em 1975, John H. Holland publicava *Adaptation in natural and artificial systems*, livro pioneiro nos algoritmos genéticos, que se baseiam na teoria neodarwinista para encontrar soluções em problemas de otimização combinatória. A teoria neodarwinista explica como surgem novas espécies através de tres pilares:
 
-![fluxograma][/assets/images/floxogramaAG.jpg]
+- Todo ser vivo se reproduz ao alcançar a fase reprodutiva
+- Na reprodução, ocorre mutação. (Erro gerado pela combinação de proteínas)
+- A seleção natural elimina aqueles que não alcançaram a fase reprodutiva.
+    
+O algoritmo segue o seguinte esquema:
+
+![fluxograma](/assets/images/floxogramaAG.jpg)
+
+No caso, cada individuo da população inicial representa um caminho aleatório e cada caminho é uma sequencia de pontos. 
