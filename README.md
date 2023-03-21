@@ -35,6 +35,8 @@ Em 1975, John H. Holland publicava *Adaptation in natural and artificial systems
     
 O algoritmo segue o seguinte esquema:
 
-![fluxograma](/assets/images/floxogramaAG.jpg)
+![fluxograma](./assets/images/fluxogramaAG.jpg)
 
-No caso, cada individuo da população inicial representa um caminho aleatório e cada caminho é uma sequencia de pontos. 
+No caso, cada individuo da população inicial representa um caminho aleatório e cada caminho é uma sequencia de pontos. A seleção dos pais depende do calculo de fitness de cada individuo da população, ou seja, o quão boa é a solução. Decidi calcular esse fitness como 1/d, sendo d a distancia euclidiana do caminho, pois queremos minimizar o caminho percorrido. Após dividir cada fitness pela soma de todos os outros, teremos a probabilidade de cada individuo ser selecionado e gerar outros individuos. 
+
+Após selecionados os pais, devemos realizar o *crossing over*, equivalente a reprodução entre os individuos, mas ao invés de recombinarmos proteinas de fitas de DNA, estaremos recombinando sequencias de pontos de cada caminho (individuo). Experimentei três tecnicas de crossover, 
