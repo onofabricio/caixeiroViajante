@@ -49,7 +49,7 @@ Na etapa de convergencia, o caminho ótimo com certeza não terá caminhos cruza
 Percebe-se que há um cruzamento entre as arestas $\overline{AC}$ e $\overline{BD}$, em que chamaremos de ponto $Q$
 (Imagem adição do ponto Q)
 
-Pela propriedade da desigualdade triangular, $\overline{AQ} + \overline{QB} \le \overline{AB}$, o mesmo se nota em $\overline{CQ} + \overline{QD} \le \overline{CD}$. Portanto, um caminho menor teria que passar pelas retas $\overline{AB}$ e $\overline{CD}$, necessariamente. Assim,  um polígono $P'$ que representa o caminho $ABCD$, seria do tipo:
+Pela propriedade da desigualdade triangular, $\overline{AQ} + \overline{QB} \ge \overline{AB}$, o mesmo se nota em $\overline{CQ} + \overline{QD} \ge \overline{CD}$. Portanto, um caminho menor teria que passar pelas retas $\overline{AB}$ e $\overline{CD}$, necessariamente. Assim,  um polígono $P'$ que representa o caminho $ABCD$, seria do tipo:
 (Imagem caminho melhorado)
 
 ### NOTAS
